@@ -64,11 +64,11 @@ const createRadar = c => {
   c.stroke();
 };
 
-window.radarCanvas.fitToBody = (canvas, documentBody) => {
+window.radarCanvas.fitToBody = (canvas, documentBody, heightMargin) => {
   canvas.style.width ='100%';
   canvas.style.height='100%';
   canvas.width  = documentBody.offsetWidth;
-  canvas.height = documentBody.offsetHeight;
+  canvas.height = documentBody.offsetHeight - heightMargin;
 };
 
 window.radarCanvas.update = (canvas, context) => {

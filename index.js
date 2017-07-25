@@ -1,12 +1,13 @@
 
-var canvas = document.getElementById('the-canvas');
-var context = canvas.getContext('2d');
-window.radarCanvas.fitToBody(canvas, document.body);
+const canvas = document.getElementById('the-canvas');
+const context = canvas.getContext('2d');
+const magicHeightModifier = 43;
 
 window.onload = () => {
+  window.radarCanvas.fitToBody(canvas, document.body, magicHeightModifier);
   window.dragger.init(canvas, draw);
   draw();
-  window.notes.add(context, 75, 75);
+  window.notes.registerAddNoteButtonFromDom(document.querySelector('.note-controls .add-note'), context);
 }
 
 const draw = () => {

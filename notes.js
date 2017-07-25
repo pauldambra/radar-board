@@ -3,6 +3,11 @@ window.notes = window.notes || {};
 
 window.notes.currentlyVisible = [];
 
+window.notes.registerAddNoteButtonFromDom = (element, context) => {
+  const addNotes$ = window.Rx.Observable.fromEvent(element, 'click');
+  addNotes$.subscribe(clicks => window.notes.add(context, 0, 0));
+}
+
 const drawNote = (context, note) => {
   context.fillStyle = 'yellow';
   context.fillRect(note.x, note.y, 75, 75);
