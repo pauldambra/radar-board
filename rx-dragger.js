@@ -1,7 +1,6 @@
 
 window.dragger = window.dragger || {};
-
-const notes = [];
+window.notes = window.notes || {};
 
 const mouseCoordInsideNote = (note, mouseDown) => {
   const mouseDownWithinWidth = note.x <= mouseDown.x && mouseDown.x <= (note.x + 75);
@@ -10,7 +9,7 @@ const mouseCoordInsideNote = (note, mouseDown) => {
 };
 
 const firstDraggableUnderMouse = mouseDown => {
-  const note = notes.find(n => mouseCoordInsideNote(n, mouseDown));
+  const note = window.notes.currentlyVisible.find(n => mouseCoordInsideNote(n, mouseDown));
 
   if (!note) {return null;}
   return {
@@ -56,28 +55,9 @@ window.dragger.init = (canvas, draw) => {
 
   mouseUps
     .subscribe(mu => {
-      notes.filter(n => n.dragging)
+      window.notes.currentlyVisible.filter(n => n.dragging)
            .forEach(n => n.dragging = false);
       });
 
   mouseUps.observeOn(Rx.Scheduler.animationFrame).subscribe(draw);
 };
-
-const drawNote = (context, note) => {
-  context.fillStyle = 'yellow';
-  context.fillRect(note.x, note.y, 75, 75);
-};
-
-window.dragger.addNote = (context, x, y) => { 
-  const note = {x, y, dragging: false};
-  notes.push(note);
-  drawNote(context, note);
-}
-
-window.dragger.drawNotes = context => {
-  notes.forEach(n => drawNote(context, n));
-};
-
-window.dragger.debug = () => {
-  notes.forEach(console.log);
-}

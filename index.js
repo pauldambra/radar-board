@@ -6,10 +6,10 @@ window.radarCanvas.fitToBody(canvas, document.body);
 window.onload = () => {
   window.dragger.init(canvas, draw);
   draw();
-  window.dragger.addNote(context, 75, 75);
+  window.notes.add(context, 75, 75);
 }
 
 const draw = () => {
   window.radarCanvas.update(canvas, context);
-  window.dragger.drawNotes(context);
+  window.notes.drawAll(context);
 };
