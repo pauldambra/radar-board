@@ -1,15 +1,16 @@
 const rx = require('rxjs');
+
 const currentlyVisible = [];
 
-const add = (context, x, y) => { 
-  const note = {x, y, dragging: false};
+const add = args => { 
+  const note = {
+    x: args.top, 
+    y: args.left, 
+    title: args.title, 
+    dragging: false
+  };
   currentlyVisible.push(note);
-  drawNote(context, note);
-}
-
-const registerAddNoteButtonFromDom = (element, context) => {
-  const addNotes$ = rx.Observable.fromEvent(element, 'click');
-  addNotes$.subscribe(clicks => add(context, 0, 0));
+  drawNote(args.context, note);
 }
 
 const drawNote = (context, note) => {
@@ -24,7 +25,7 @@ const drawAll = context => {
 
 module.exports = {
   currentlyVisible,
-  registerAddNoteButtonFromDom,
   drawAll,
+  drawNote,
   add
 };
