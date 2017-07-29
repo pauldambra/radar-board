@@ -1,4 +1,4 @@
-const rx = require('rxjs');
-window.Rx = rx;
+const rx = require('rxjs')
+window.Rx = rx
 
-require('./index');
+require('./index')

@@ -9,7 +9,10 @@ clean_dist: ensure_dist
 copy_index:
 	cp ./index.html dist/index.html
 
-bundle_javascript:
+lint:
+	./node_modules/.bin/standard --fix
+
+bundle_javascript: lint
 	./node_modules/.bin/browserify --entry ./app/start.js --outfile ./dist/bundle.js --transform [ babelify ]
 
 write_to_dist: copy_index bundle_javascript
