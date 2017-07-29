@@ -39,10 +39,13 @@ const splitTextToMaxWidth = (text, context, textMaxWidth) => {
   }, [""]);
 };
 
-const wrapLines = (context, textMaxWidth, font, text) => {
-  textMaxWidth = textMaxWidth - paint.textPadding;
-  context.font = font;
-  return splitTextToMaxWidth(text, context, textMaxWidth);
+const wrapLines = (context, text) => {
+  const textMaxWidth = paint.desiredNoteWidth - paint.textPadding;
+  context.font = paint.font;
+
+  return splitTextToMaxWidth(text, context, textMaxWidth)
+  .map(line => line.trim())
+  .map(line => ({text: line}));
 };
 
 const drawRectangle = (context, note) => {
@@ -57,13 +60,9 @@ const drawTitle = (context, note) => {
   context.textBaseline = "middle";
 
   note.wrappedLines.forEach((line, index) => {
-    const thisLineOffset = (paint.fontHeight + paint.lineSpace) * index;
-    const lineY = (note.y + paint.textPadding) + thisLineOffset;
-    const lineWidth = context.measureText(line).width;
-    const margin = (paint.desiredNoteWidth - lineWidth) / 2;
-    const lineX = note.x + margin;
-
-    context.fillText(line, lineX, lineY);
+    const lineY = (note.y + paint.textPadding) + line.yOffset;
+    const lineX = note.x + line.margin;
+    context.fillText(line.text, lineX, lineY);
   });
 }
 
@@ -71,7 +70,17 @@ const drawTitle = (context, note) => {
 const drawNote = (context, note) => {
     
   if (!note.wrappedLines) {
-    note.wrappedLines = wrapLines(context, paint.desiredNoteWidth, paint.font, note.title);
+    note.wrappedLines = wrapLines(context, note.title)
+      .map((line, index) => {
+        line.yOffset = (paint.fontHeight + paint.lineSpace) * index
+        return line;
+      })
+      .map((line, index) => {
+        const lineWidth = context.measureText(line.text).width;
+        line.margin = (paint.desiredNoteWidth - lineWidth) / 2;
+        return line;
+      });
+
     note.textHeight = note.wrappedLines.length * (paint.fontHeight + paint.lineSpace) + (paint.textPadding * 2);
   }
 
