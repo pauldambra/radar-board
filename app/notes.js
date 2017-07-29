@@ -66,33 +66,45 @@ const drawTitle = (context, note) => {
   });
 }
 
-// ARGH! all of this calculation could be done once!
-const drawNote = (context, note) => {
-    
-  if (!note.wrappedLines) {
-    note.wrappedLines = wrapLines(context, note.title)
-      .map((line, index) => {
-        line.yOffset = (paint.fontHeight + paint.lineSpace) * index
-        return line;
-      })
-      .map((line, index) => {
-        const lineWidth = context.measureText(line.text).width;
-        line.margin = (paint.desiredNoteWidth - lineWidth) / 2;
-        return line;
-      });
+const addYOffsetToLine = (line, index) => {
+  line.yOffset = (paint.fontHeight + paint.lineSpace) * index
+  return line;
+}
 
-    note.textHeight = note.wrappedLines.length * (paint.fontHeight + paint.lineSpace) + (paint.textPadding * 2);
+const prepareToAddMarginToLines = (context) => (line, index) => {
+  const lineWidth = context.measureText(line.text).width;
+  line.margin = (paint.desiredNoteWidth - lineWidth) / 2;
+  return line;
+}
+
+const updateNoteWithWrappedTitleText = (context, note) => {
+  const addMarginToLine = prepareToAddMarginToLines(context);
+
+  note.wrappedLines = wrapLines(context, note.title)
+    .map(addYOffsetToLine)
+    .map(addMarginToLine);
+
+  note.textHeight = note.wrappedLines.length * (paint.fontHeight + paint.lineSpace) + (paint.textPadding * 2);
+};
+
+const reportTitleIsTooTall = note => {
+  const errorParams = {
+    wrappedLines: note.wrappedLines, 
+    textHeight: note.textHeight, 
+    maxHeight: paint.maxNoteHeight
+  };
+  const message = `wanted max height of ${paint.maxNoteHeight} but wrapped text height is ${note.textHeight}`;
+  console.error(errorParams, message);
+}
+
+const drawNote = (context, note) => {   
+  if (!note.wrappedLines) {
+    updateNoteWithWrappedTitleText(context, note);
   }
 
   if (note.textHeight > paint.maxNoteHeight) {
-    //what should we TODO?
-    const errorParams = {
-      wrappedLines: note.wrappedLines, 
-      textHeight: note.textHeight, 
-      maxHeight: paint.maxNoteHeight
-    };
-    const message = `wanted max height of ${paint.maxNoteHeight} but wrapped text height is ${note.textHeight}`;
-    console.error(errorParams, message);
+    //what _should_ we TODO?
+    reportTitleIsTooTall(note);
   }
 
   drawRectangle(context, note);
