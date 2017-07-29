@@ -35,31 +35,32 @@ const west = d2r(180);
 
 const drawClockwise = false;
 
-const createRadar = c => {
-  c.font = '24px sanserif';
-  c.fillStyle = 'black';
+const createRadar = context => {
+  context.font = '24px sanserif';
+  context.fillStyle = 'black';
+  context.textBaseline = "alphabetic";
+  
+  context.beginPath();
 
-  c.beginPath();
+  context.moveTo(origin.x,origin.y);
+  context.lineTo(topRight.x, topRight.y);
+  context.lineTo(bottomRight.x, bottomRight.y);
 
-  c.moveTo(origin.x,origin.y);
-  c.lineTo(topRight.x, topRight.y);
-  c.lineTo(bottomRight.x, bottomRight.y);
+  context.fillText('Now', max.x - 120, 25);
+  drawArc(context, radiusNow);
+  context.moveTo(topRight.x, topRight.y + radiusNow);
 
-  c.fillText('Now', max.x - 120, 25);
-  drawArc(c, radiusNow);
-  c.moveTo(topRight.x, topRight.y + radiusNow);
+  context.fillText('Next', max.x - 380, 25);
+  drawArc(context, radiusNext);
+  context.moveTo(topRight.x, topRight.y + radiusNext);
 
-  c.fillText('Next', max.x - 380, 25);
-  drawArc(c, radiusNext);
-  c.moveTo(topRight.x, topRight.y + radiusNext);
+  context.fillText('Later', max.x - 610, 25);
 
-  c.fillText('Later', max.x - 610, 25);
-
-  c.fillStyle = 'white';
-  c.fill();
-  c.strokeStyle = 'black';
-  c.lineWidth = 1;
-  c.stroke();
+  context.fillStyle = 'white';
+  context.fill();
+  context.strokeStyle = 'black';
+  context.lineWidth = 1;
+  context.stroke();
 };
 
 const fitToBody = (canvas, documentBody, heightMargin) => {
