@@ -1,5 +1,7 @@
 const rx = require('rxjs');
 
+const canvasLines = require('./canvas-lines.js')
+
 const currentlyVisible = [];
 
 const add = args => { 
@@ -24,29 +26,7 @@ const paint = {
     maxNoteHeight: 150
 }
 
-const fitsInWidth = (ctx, word, width) => ctx.measureText(word).width < width;
 
-const splitTextToMaxWidth = (text, context, textMaxWidth) => {
-  const words = text.split(' ');
-  return words.reduce((lines, word) => {
-    const candidateLine = `${lines[lines.length-1]} ${word}`;
-    if (fitsInWidth(context, candidateLine, textMaxWidth)) {
-      lines[lines.length-1] = candidateLine;
-    } else {
-      lines.push(word);
-    }
-    return lines;
-  }, [""]);
-};
-
-const wrapLines = (context, text) => {
-  const textMaxWidth = paint.desiredNoteWidth - paint.textPadding;
-  context.font = paint.font;
-
-  return splitTextToMaxWidth(text, context, textMaxWidth)
-  .map(line => line.trim())
-  .map(line => ({text: line}));
-};
 
 const drawRectangle = (context, note) => {
   const rectangleHeight = note.textHeight + (paint.textPadding * 2);
@@ -66,27 +46,6 @@ const drawTitle = (context, note) => {
   });
 }
 
-const addYOffsetToLine = (line, index) => {
-  line.yOffset = (paint.fontHeight + paint.lineSpace) * index
-  return line;
-}
-
-const prepareToAddMarginToLines = (context) => (line, index) => {
-  const lineWidth = context.measureText(line.text).width;
-  line.margin = (paint.desiredNoteWidth - lineWidth) / 2;
-  return line;
-}
-
-const updateNoteWithWrappedTitleText = (context, note) => {
-  const addMarginToLine = prepareToAddMarginToLines(context);
-
-  note.wrappedLines = wrapLines(context, note.title)
-    .map(addYOffsetToLine)
-    .map(addMarginToLine);
-
-  note.textHeight = note.wrappedLines.length * (paint.fontHeight + paint.lineSpace) + (paint.textPadding * 2);
-};
-
 const reportTitleIsTooTall = note => {
   const errorParams = {
     wrappedLines: note.wrappedLines, 
@@ -99,11 +58,11 @@ const reportTitleIsTooTall = note => {
 
 const drawNote = (context, note) => {   
   if (!note.wrappedLines) {
-    updateNoteWithWrappedTitleText(context, note);
+    const wrappedText = canvasLines.wrapText(context, note.title);
+    note = Object.assign(note, wrappedText);
   }
 
   if (note.textHeight > paint.maxNoteHeight) {
-    //what _should_ we TODO?
     reportTitleIsTooTall(note);
   }
 
