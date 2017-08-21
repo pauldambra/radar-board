@@ -3,11 +3,8 @@ const paint = {
   font: '12px Arial',
   fontHeight: 12,
   lineSpace: 2,
-  fillColour: 'yellow',
-  textColour: '#000',
   textPadding: 10,
-  desiredNoteWidth: 150,
-  maxNoteHeight: 150
+  desiredNoteWidth: 150
 }
 
 const fitsInWidth = (ctx, word, width) => ctx.measureText(word).width < width

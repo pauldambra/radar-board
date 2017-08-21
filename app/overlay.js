@@ -4,6 +4,7 @@ const notes = require('./notes.js')
 
 const show = (overlayElement) => {
   overlayElement.style.visibility = 'visible'
+  document.querySelector('[data-note-name]').focus()
 }
 
 const hide = (overlayElement) => {
@@ -20,19 +21,15 @@ const wireUpOverlayClosing = (overlayElement) => {
   return closeOverlayOnSave$
 }
 
-const init = (context) => {
-  const overlayElement = document.getElementById('overlay')
-
+const wireUpAddingNotes = overlayElement => {
   const addNoteButton = document.querySelector('.note-controls [data-add-note]')
-  const saveNoteButton = document.querySelector('[data-save-note]')
-
   const addNotes$ = rx.Observable.fromEvent(addNoteButton, 'click')
   addNotes$.subscribe(clicks => show(overlayElement))
+}
 
-  const manuallyCloseOverlay$ = wireUpOverlayClosing(overlayElement)
-
+const wireUpTheSaveButton = (context, manuallyCloseOverlay$) => {
+  const saveNoteButton = document.querySelector('[data-save-note]')
   const saveClicks$ = rx.Observable.fromEvent(saveNoteButton, 'click')
-
   saveClicks$.subscribe(clicks => {
     notes.add({
       context,
@@ -42,6 +39,14 @@ const init = (context) => {
     })
     manuallyCloseOverlay$.next()
   })
+}
+
+const init = (context) => {
+  const overlayElement = document.getElementById('overlay')
+  wireUpAddingNotes(overlayElement)
+
+  const manuallyCloseOverlay$ = wireUpOverlayClosing(overlayElement)
+  wireUpTheSaveButton(context, manuallyCloseOverlay$)
 }
 
 module.exports = {

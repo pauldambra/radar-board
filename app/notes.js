@@ -1,42 +1,47 @@
 const canvasLines = require('./canvas-lines.js')
+const localRepo = new (require('./localRepo.js'))(window.localStorage)
+const config = require('./config.js')
 
-const currentlyVisible = []
+/* taken from https://stackoverflow.com/a/8809472/222163 */
+const generateUUID = () => {
+  var d = new Date().getTime()
+  if (!!window &&
+      !!window.performance &&
+      typeof window.performance.now === 'function') {
+    d += window.performance.now() // use high-precision timer if available
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    var r = (d + Math.random() * 16) % 16 | 0
+    d = Math.floor(d / 16)
+    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16)
+  })
+}
 
 const add = args => {
   const note = {
     x: args.top,
     y: args.left,
     title: args.title,
-    dragging: false
+    dragging: false,
+    id: generateUUID()
   }
-  currentlyVisible.push(note)
+  localRepo.upsert(note)
   drawNote(args.context, note)
 }
 
-const paint = {
-  font: '12px Arial',
-  fontHeight: 12,
-  lineSpace: 2,
-  fillColour: 'yellow',
-  textColour: '#000',
-  textPadding: 10,
-  desiredNoteWidth: 150,
-  maxNoteHeight: 150
-}
-
 const drawRectangle = (context, note) => {
-  const rectangleHeight = note.textHeight + (paint.textPadding * 2)
-  context.fillStyle = paint.fillColour
-  context.fillRect(note.x, note.y, paint.desiredNoteWidth, rectangleHeight)
+  const rectangleHeight = note.textHeight + (config.textPadding * 2)
+  context.fillStyle = config.fillColour
+  context.fillRect(note.x, note.y, config.desiredNoteWidth, rectangleHeight)
 }
 
 const drawTitle = (context, note) => {
-  context.fillStyle = paint.textColour
-  context.font = paint.font
+  context.fillStyle = config.textColour
+  context.font = config.font
   context.textBaseline = 'middle'
 
   note.wrappedLines.forEach((line, index) => {
-    const lineY = (note.y + paint.textPadding) + line.yOffset
+    const lineY = (note.y + config.textPadding) + line.yOffset
     const lineX = note.x + line.margin
     context.fillText(line.text, lineX, lineY)
   })
@@ -46,9 +51,9 @@ const reportTitleIsTooTall = note => {
   const errorParams = {
     wrappedLines: note.wrappedLines,
     textHeight: note.textHeight,
-    maxHeight: paint.maxNoteHeight
+    maxHeight: config.maxNoteHeight
   }
-  const message = `wanted max height of ${paint.maxNoteHeight} but wrapped text height is ${note.textHeight}`
+  const message = `wanted max height of ${config.maxNoteHeight} but wrapped text height is ${note.textHeight}`
   console.error(errorParams, message)
 }
 
@@ -58,7 +63,7 @@ const drawNote = (context, note) => {
     note = Object.assign(note, wrappedText)
   }
 
-  if (note.textHeight > paint.maxNoteHeight) {
+  if (note.textHeight > config.maxNoteHeight) {
     reportTitleIsTooTall(note)
   }
 
@@ -67,11 +72,10 @@ const drawNote = (context, note) => {
 }
 
 const drawAll = context => {
-  currentlyVisible.forEach(n => drawNote(context, n))
+  localRepo.forEach(n => drawNote(context, n))
 }
 
 module.exports = {
-  currentlyVisible,
   drawAll,
   drawNote,
   add

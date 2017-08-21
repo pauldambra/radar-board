@@ -1,14 +1,16 @@
 const rx = require('rxjs')
-const notes = require('./notes.js')
+const localRepo = new (require('./localRepo.js'))(window.localStorage)
+const config = require('./config.js')
 
 const mouseCoordInsideNote = (note, mouseDown) => {
-  const coordWithinWidth = note.x <= mouseDown.x && mouseDown.x <= (note.x + 75)
-  const coordWithinHeight = note.y <= mouseDown.y && mouseDown.y <= (note.y + 75)
+  const w = config.desiredNoteWidth
+  const coordWithinWidth = note.x <= mouseDown.x && mouseDown.x <= (note.x + w)
+  const coordWithinHeight = note.y <= mouseDown.y && mouseDown.y <= (note.y + w)
   return coordWithinWidth && coordWithinHeight
 }
 
 const firstDraggableUnderMouse = mouseDown => {
-  const note = notes.currentlyVisible.find(n => mouseCoordInsideNote(n, mouseDown))
+  const note = localRepo.find(n => mouseCoordInsideNote(n, mouseDown))
 
   if (!note) { return null }
   return {
@@ -41,11 +43,16 @@ const init = (canvas, draw) => {
                      .takeUntil(mouseUps)
   })
 
+  const updateNote = pos => {
+    pos.note.x = pos.x
+    pos.note.y = pos.y
+    pos.note.dragging = true
+  }
+
   mouseDrag.subscribe(
     pos => {
-      pos.note.x = pos.x
-      pos.note.y = pos.y
-      pos.note.dragging = true
+      updateNote(pos)
+      localRepo.upsert(pos.note)
     })
 
   mouseDrag
@@ -54,7 +61,7 @@ const init = (canvas, draw) => {
 
   mouseUps
     .subscribe(mu => {
-      notes.currentlyVisible.filter(n => n.dragging)
+      localRepo.filter(n => n.dragging)
            .forEach(n => { n.dragging = false })
     })
 
