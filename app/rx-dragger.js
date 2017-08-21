@@ -9,18 +9,18 @@ const mouseCoordInsideNote = (note, mouseDown) => {
   return coordWithinWidth && coordWithinHeight
 }
 
-const firstDraggableUnderMouse = mouseDown => {
-  const note = localRepo.find(n => mouseCoordInsideNote(n, mouseDown))
+const firstDraggableUnderMouse = mouseDown => ({
+  mouseDown,
+  note: localRepo.find(n => mouseCoordInsideNote(n, mouseDown))
+})
 
-  if (!note) { return null }
-  return {
-    note: note,
-    startPosition: {
-      x: mouseDown.x - note.x,
-      y: mouseDown.y - note.y
-    }
+const asMouseDown = md => ({
+  note: md.note,
+  startPosition: {
+    x: md.mouseDown.x - md.note.x,
+    y: md.mouseDown.y - md.note.y
   }
-}
+})
 
 const withOffset = (position, mouseDown) => ({
   note: mouseDown.note,
@@ -36,7 +36,8 @@ const init = (canvas, draw) => {
     .fromEvent(canvas, 'mousedown')
     .map(ev => ({x: ev.offsetX, y: ev.offsetY}))
     .map(firstDraggableUnderMouse)
-    .filter(n => !!n)
+    .filter(md => !!md.note)
+    .map(asMouseDown)
 
   const mouseDrag = mouseDowns.flatMap(mouseDown => {
     return mouseMoves.map(move => withOffset(move, mouseDown))
