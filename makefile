@@ -26,7 +26,7 @@ live_reload: bundle_javascript
 	./node_modules/.bin/livereload ./dist
 
 run_server:
-	cd dist && python -m SimpleHTTPServer
+	cd dist && python -m http.server
 
 dev: build run_server
 

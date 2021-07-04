@@ -14,7 +14,7 @@ The online radar board!
 
 ... entry points are in the makefile
 
-`yarn && make dev` to build the code and start a server to run it.
+`npm install && make dev` to build the code and start a server to run it.
 
 requires python2, yarn, and nodejs for that to work.
 
